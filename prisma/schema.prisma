@@ -20,7 +20,11 @@ enum Genre{
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
-  name      String?
+  name      String
+  password  String
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   reviews   Review[]
 } 

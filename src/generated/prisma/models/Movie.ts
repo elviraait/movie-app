@@ -383,6 +383,10 @@ export type MovieScalarRelationFilter = {
   isNot?: Prisma.MovieWhereInput
 }
 
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
+}
+
 export type IntFieldUpdateOperationsInput = {
   set?: number
   increment?: number
@@ -393,10 +397,6 @@ export type IntFieldUpdateOperationsInput = {
 
 export type EnumGenreFieldUpdateOperationsInput = {
   set?: $Enums.Genre
-}
-
-export type DateTimeFieldUpdateOperationsInput = {
-  set?: Date | string
 }
 
 export type MovieCreateNestedOneWithoutReviewsInput = {
