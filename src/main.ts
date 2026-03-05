@@ -1,11 +1,13 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { SwaggerModule } from '@nestjs/swagger';
-import { DocumentBuilder } from '@nestjs/swagger';
+import cookieParser from 'cookie-parser';
+import { setupSwagger } from './utils/swagger.util';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.use(cookieParser());
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -15,18 +17,8 @@ async function bootstrap() {
     }),
   );
 
-  const config = new DocumentBuilder()
-    .setTitle('Movie API')
-    .setDescription('API для управления фильмами и отзывами')
-    .setVersion('1.0.0')
-    .addTag('movies')
-    .addTag('reviews')
-    .addTag('users')
-    .build();
+  setupSwagger(app);
   
-    const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
-
   await app.listen(3000);
 }
 bootstrap();
