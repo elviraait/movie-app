@@ -101,6 +101,17 @@ export class AuthService {
     return { message: 'Вы успешно вышли из аккаунта' };
   }
 
+  async validateUser(id: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: { id: true },
+    });
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+    return user;
+  }
+
   private auth(res: Response, id: string) {
     const { accessToken, refreshToken } = this.generateTokens(id);
     this.setCookie(
@@ -133,4 +144,12 @@ export class AuthService {
       sameSite: !isDev(this.configService) ? 'none' : 'lax',
     });
   }
+
+  async getMyReviews(userId: string) {
+  return this.prisma.review.findMany({
+    where: {
+      userId: userId,
+    },
+  });
+}
 }
