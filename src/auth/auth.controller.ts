@@ -19,11 +19,14 @@ import { AuthGuard } from '@nestjs/passport';
 import { Authorization } from './decorators/authorization.decorator';
 import { Authorized } from './decorators/authorized.decorator';
 import { User } from 'src/users/entities/user.entity';
+import { Public } from './decorators/public.decorator';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Public() // no auth required
+  @ApiOperation({ summary: 'Регистрация пользователя' })
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   async register(
@@ -33,6 +36,8 @@ export class AuthController {
     return this.authService.register(res, dto);
   }
 
+  @Public() // no auth required
+  @ApiOperation({ summary: 'Авторизация пользователя' })
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(
@@ -42,6 +47,7 @@ export class AuthController {
     return this.authService.login(res, dto);
   }
 
+  @Public() // no auth required
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   async refresh(

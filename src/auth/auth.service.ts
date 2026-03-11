@@ -101,16 +101,14 @@ export class AuthService {
     return { message: 'Вы успешно вышли из аккаунта' };
   }
 
-  async validateUser(id: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id },
-      select: { id: true },
-    });
-    if (!user) {
-      throw new NotFoundException('Пользователь не найден');
-    }
-    return user;
-  }
+ async validateUser(id: string) {
+  const user = await this.prisma.user.findUnique({
+    where: { id },
+    select: { id: true, role: true },
+  });
+  if (!user) throw new NotFoundException('Пользователь не найден');
+  return user;
+}
 
   private auth(res: Response, id: string) {
     const { accessToken, refreshToken } = this.generateTokens(id);

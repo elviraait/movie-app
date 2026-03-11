@@ -1,66 +1,51 @@
+
 import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Query,
+  Controller, Get, Post, Body, Patch, Param, Delete, Query,
 } from '@nestjs/common';
 import { MoviesService } from './movies.service';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
+import { QueryMoviesDto } from './dto/query-movies.dto';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { Role } from 'src/auth/enums/role.enum';
 
 @ApiTags('movies')
 @Controller('movies')
 export class MoviesController {
   constructor(private readonly moviesService: MoviesService) {}
 
-  @ApiOperation({ summary: 'Создание фильма' })
-  @ApiResponse({ status: 201, description: 'Фильм успешно создан.' })
-  @ApiResponse({ status: 400, description: 'Некорректные данные.' })
-  @Post()
-  create(@Body() dto: CreateMovieDto) {
-    return this.moviesService.create(dto);
-  }
-
-  @ApiOperation({ summary: 'Получение всех фильмов' })
-  @ApiResponse({ status: 200, description: 'Фильмы успешно получены.' })
-  @ApiQuery({
-    name: 'year',
-    required: false,
-    description: 'Год выпуска фильма',
-  })
-  @ApiQuery({ name: 'title', required: false, description: 'Название фильма' })
+  // GET /movies?page=1&limit=5&genre=ACTION&year=2024&title=matrix&sortBy=year&order=asc
   @Get()
-  findAll(@Query('year') year?: string, @Query('title') title?: string) {
-    return this.moviesService.findAll(year ? Number(year) : undefined, title);
+  findAll(@Query() query: QueryMoviesDto) {
+    return this.moviesService.findAll(query);
   }
 
-  @ApiOperation({ summary: 'Получение фильма с отзывами' })
-  @ApiResponse({
-    status: 200,
-    description: 'Фильм с отзывами успешно получен.',
-  })
-  @ApiResponse({ status: 404, description: 'Фильм не найден.' })
   @Get(':id/reviews')
   findOneWithReviews(@Param('id') id: string) {
     return this.moviesService.findOneWithReviews(id);
   }
 
-  @ApiOperation({ summary: 'Получение фильма по ID' })
-  @ApiResponse({ status: 200, description: 'Фильм успешно получен.' })
-  @ApiResponse({ status: 404, description: 'Фильм не найден.' })
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.moviesService.findOne(id);
   }
 
-  @ApiOperation({ summary: 'Удаление фильма' })
-  @ApiResponse({ status: 200, description: 'Фильм успешно удалён.' })
-  @ApiResponse({ status: 404, description: 'Фильм не найден.' })
+  // --- ADMIN ONLY routes ---
+
+  @Roles(Role.ADMIN)
+  @Post()
+  create(@Body() dto: CreateMovieDto) {
+    return this.moviesService.create(dto);
+  }
+
+  @Roles(Role.ADMIN)
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() dto: UpdateMovieDto) {
+    return this.moviesService.update(id, dto);
+  }
+
+  @Roles(Role.ADMIN)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.moviesService.remove(id);

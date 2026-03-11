@@ -13,9 +13,7 @@ export class CreateReviewDto {
   @IsOptional()
   comment?: string;
 
-  @ApiProperty({ description: 'ID пользователя, оставившего отзыв', example: 'user123' })
-  @IsString()
-  userId: string;
+  @ApiProperty({ description: 'ID фильма, к которому относится отзыв', example: 'movie-uuid' })
   @IsString()
   movieId: string;
 }
