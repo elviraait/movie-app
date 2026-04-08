@@ -24,12 +24,13 @@ import { ServeStaticModule } from '@nestjs/serve-static';
     ConfigModule.forRoot({ isGlobal: true }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'), // code-first approach
+      autoSchemaFile: join(process.cwd(), 'schema.gql'), // убрать 'src/' // code-first approach
       playground: true,
       sortSchema: true, // enables the GraphQL playground at /graphql
     }),
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'uploads'),
+
       serveRoot: '/static', // files will be served at /static/filename
     }),
     PrismaModule,
@@ -53,5 +54,3 @@ import { ServeStaticModule } from '@nestjs/serve-static';
   ],
 })
 export class AppModule {}
-
-

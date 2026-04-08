@@ -25,6 +25,6 @@ async function bootstrap() {
 
   setupSwagger(app);
 
-  await app.listen(3000); // NestJS остаётся на 3000 порту
+  await app.listen(process.env.PORT || 3000, '0.0.0.0'); // NestJS остаётся на 3000 порту
 }
 bootstrap();
