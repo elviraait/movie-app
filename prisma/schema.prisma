@@ -1,15 +1,15 @@
-
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
   moduleFormat = "cjs"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-enum Genre{
+enum Genre {
   ACTION
   COMEDY
   DRAMA
@@ -28,12 +28,12 @@ model User {
   name      String
   password  String
   role      Role     @default(USER)
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   reviews   Review[]
-} 
+}
 
 model Movie {
   id          String   @id @default(uuid())
@@ -57,7 +57,7 @@ model Review {
   movieId   String
   userId    String
   createdAt DateTime @default(now())
-  
+
   movie Movie @relation(fields: [movieId], references: [id])
   user  User  @relation(fields: [userId], references: [id])
 }
