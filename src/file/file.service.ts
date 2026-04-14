@@ -1,18 +1,44 @@
-import { Injectable } from '@nestjs/common';
-import path from 'path';
-import fs from 'fs';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
 
 @Injectable()
 export class FileService {
-    async uploadFile(file: Express.Multer.File) {
-        const uploadDir = path.join(process.cwd(), 'uploads'); //current working directory - текущий рабочий каталог
-        const filePath = path.join(uploadDir, file.originalname);
-        
-        if(!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true }); //mkdirSync - создание каталога
-        }
+  constructor() {
+    // Configure Cloudinary from env vars
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key:    process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
+  }
 
-        fs.writeFileSync(filePath, file.buffer);
-        return{ path: filePath };
+  async uploadFile(file: Express.Multer.File): Promise<{ url: string }> {
+    // If Cloudinary is not configured, reject upload
+    if (!process.env.CLOUDINARY_CLOUD_NAME) {
+      throw new InternalServerErrorException(
+        'Image upload is not configured. Set CLOUDINARY_* env vars or use a poster URL directly.',
+      );
     }
+
+    return new Promise((resolve, reject) => {
+      cloudinary.uploader
+        .upload_stream(
+          {
+            folder: 'cinevault/posters',
+            transformation: [
+              { width: 600, height: 900, crop: 'fill', gravity: 'auto' },
+              { quality: 'auto:good', fetch_format: 'auto' },
+            ],
+          },
+          (error: Error | undefined, result: UploadApiResponse | undefined) => {
+            if (error || !result) {
+              reject(new InternalServerErrorException('Upload to Cloudinary failed'));
+            } else {
+              resolve({ url: result.secure_url });
+            }
+          },
+        )
+        .end(file.buffer);
+    });
+  }
 }

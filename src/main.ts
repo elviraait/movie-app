@@ -9,10 +9,22 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
-  // Это разрешает запросы с Next.js фронтенда
+  const allowedOrigins = [
+    process.env.FRONTEND_URL || 'http://localhost:3001',
+    'http://localhost:3001',
+  ].filter(Boolean);
+
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3001', // адрес Next.js
-    credentials: true, // ОБЯЗАТЕЛЬНО — иначе cookies не работают
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
   app.useGlobalPipes(
@@ -25,6 +37,7 @@ async function bootstrap() {
 
   setupSwagger(app);
 
-  await app.listen(process.env.PORT || 3000); // NestJS остаётся на 3000 порту
+  await app.listen(process.env.PORT || 3000);
+  console.log(`Server running on port ${process.env.PORT || 3000}`);
 }
 bootstrap();

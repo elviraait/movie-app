@@ -19,6 +19,7 @@ enum Genre {
 enum Role {
   USER
   ADMIN
+  SUPER_ADMIN
 }
 
 model User {
@@ -40,6 +41,7 @@ model Movie {
   description String?
   year        Int
   genre       Genre
+  posterUrl   String?
   createdAt   DateTime @default(now())
 
   reviews Review[]
