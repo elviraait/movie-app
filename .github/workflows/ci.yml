@@ -1,32 +1,53 @@
-name: CI
+name: Backend CI
 
 on:
+  push:
+    branches: [main]        # При push в main
   pull_request:
-    branches: [main, develop]
+    branches: [main]        # При PR в main
 
 jobs:
-  lint-and-build:
-    name: Lint & Build
+  ci:
+    name: Lint, Test & Build
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      # ── 1. Скачиваем код репозитория ───────────────────────
+      - name: Checkout repository
         uses: actions/checkout@v4
 
+      # ── 2. Устанавливаем Node.js 20 ─────────────────────────
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          cache: 'npm'
+          node-version: '20'
+          cache: 'npm'           # Кешируем node_modules — быстрее
 
+      # ── 3. Устанавливаем зависимости ────────────────────────
       - name: Install dependencies
         run: npm ci
 
-      - name: Generate Prisma client
-        run: npx prisma generate --config prisma.config.ts
+      # ── 4. Генерируем Prisma Client ─────────────────────────
+      # Нужно до линтинга и тестов — иначе TS не найдёт типы
+      - name: Generate Prisma Client
+        run: npx prisma generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
-      - name: Lint
-        run: npm run lint
+      # ── 5. Проверяем линтером ────────────────────────────────
+      - name: Run ESLint
+        run: npx eslint "{src,apps,libs,test}/**/*.ts"
 
+      # ── 6. Запускаем unit-тесты ─────────────────────────────
+      # Unit-тесты используют моки — реальная БД не нужна
+      - name: Run unit tests
+        run: npm test -- --passWithNoTests
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+
+      # ── 7. Проверяем что TypeScript компилируется ────────────
       - name: Build
         run: npm run build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}

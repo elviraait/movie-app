@@ -1,31 +1,42 @@
-name: CD
+name: Backend CD
 
 on:
   push:
-    branches: [main]
+    branches: [main]        # Только при push в main (не на PR)
 
 jobs:
+  # ── Сначала запускаем CI ─────────────────────────────────────
+  ci:
+    name: Run CI checks
+    uses: ./.github/workflows/ci.yml   # Переиспользуем ci.yml
+    secrets: inherit                    # Передаём все secrets
+
+  # ── Деплой — только если CI прошёл ──────────────────────────
   deploy:
-    name: Deploy to Railway
+    name: Deploy to Render
     runs-on: ubuntu-latest
+    needs: ci                # Зависит от job ci — ждёт его завершения
+    if: success()            # Запускается только если ci прошёл
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Print deploy info
+      - name: Trigger Render Deploy
         run: |
-          echo "🚀 Deploying commit: ${{ github.sha }}"
-          echo "📝 Message: ${{ github.event.head_commit.message }}"
-          echo "👤 Author:  ${{ github.event.head_commit.author.name }}"
+          curl -s -X POST '${{ secrets.RENDER_DEPLOY_HOOK }}'
+          echo 'Deploy triggered on Render'
 
-      - name: Install Railway CLI
-        run: npm install -g @railway/cli
+      # Ждём пока Render задеплоит и проверяем что API отвечает
+      - name: Wait for deployment
+        run: |
+          echo 'Waiting 90 seconds for Render to deploy...'
+          sleep 90
 
-      - name: Deploy to Railway
-        run: railway up --service ${{ secrets.RAILWAY_SERVICE_NAME }} --detach
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-
-      - name: Notify success
-        run: echo "✅ Deployed successfully to Railway"
+      - name: Health check
+        run: |
+          STATUS=$(curl -s -o /dev/null -w '%{http_code}' \
+            https://movie-app-api.onrender.com/api)
+          if [ $STATUS -eq 200 ]; then
+            echo '✅ API is up and responding!'
+          else
+            echo '❌ API health check failed (status: '$STATUS')'
+            exit 1
+          fi
