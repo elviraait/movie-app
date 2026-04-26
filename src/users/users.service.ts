@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Role } from 'src/auth/enums/role.enum';
@@ -14,8 +18,12 @@ export class UsersService {
   async findAll() {
     return await this.prisma.user.findMany({
       select: {
-        id: true, email: true, name: true, role: true,
-        createdAt: true, updatedAt: true,
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
         _count: { select: { reviews: true } },
       },
       orderBy: { createdAt: 'desc' },
@@ -31,12 +39,20 @@ export class UsersService {
     if (!user) throw new NotFoundException('User not found');
     // SUPER_ADMIN role can never be assigned via API — must be done in DB directly
     if (role === Role.SUPER_ADMIN) {
-      throw new ForbiddenException('SUPER_ADMIN role cannot be assigned via API');
+      throw new ForbiddenException(
+        'SUPER_ADMIN role cannot be assigned via API',
+      );
     }
     return await this.prisma.user.update({
       where: { id },
       data: { role },
-      select: { id: true, name: true, email: true, role: true, createdAt: true },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true,
+      },
     });
   }
 
@@ -48,10 +64,17 @@ export class UsersService {
     const user = await this.prisma.user.findUnique({
       where: { id },
       select: {
-        id: true, email: true, name: true, role: true, createdAt: true,
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        createdAt: true,
         reviews: {
           select: {
-            id: true, rating: true, comment: true, createdAt: true,
+            id: true,
+            rating: true,
+            comment: true,
+            createdAt: true,
             movie: { select: { id: true, title: true } },
           },
           orderBy: { createdAt: 'desc' },

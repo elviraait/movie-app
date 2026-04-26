@@ -6,7 +6,7 @@ import { ApiTags, ApiOperation } from '@nestjs/swagger';
 
 @ApiTags('admin')
 @Controller('admin')
-@Roles(Role.ADMIN)  // ADMIN+ (includes SUPER_ADMIN via hierarchy)
+@Roles(Role.ADMIN) // ADMIN+ (includes SUPER_ADMIN via hierarchy)
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 

@@ -23,11 +23,13 @@ export async function setupApp() {
   // Настраиваем Nest-приложение для тестов
   app = moduleFixture.createNestApplication();
   app.use(cookieParser());
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    forbidNonWhitelisted: true,
-    transform: true,
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
 
   await app.init();
   prisma = moduleFixture.get<PrismaService>(PrismaService);
@@ -41,19 +43,28 @@ export async function cleanDatabase() {
 }
 
 // Функция для регистрации пользователя, которая может быть использована в тестах
-export async function registerUser(email: string, password: string, name: string) {
+export async function registerUser(
+  email: string,
+  password: string,
+  name: string,
+) {
   const res = await request(app.getHttpServer())
     .post('/auth/register')
     .send({ email, password, name });
 
   if (res.status !== 201) {
-    throw new Error(`registerUser failed [${res.status}]: ${JSON.stringify(res.body)}`);
+    throw new Error(
+      `registerUser failed [${res.status}]: ${JSON.stringify(res.body)}`,
+    );
   }
   return res;
 }
 
 // Функция для логина пользователя, которая возвращает JWT токен для авторизации в тестах
-export async function loginAs(email: string, password: string): Promise<string> {
+export async function loginAs(
+  email: string,
+  password: string,
+): Promise<string> {
   const res = await request(app.getHttpServer())
     .post('/auth/login')
     .send({ email, password });

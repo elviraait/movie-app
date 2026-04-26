@@ -70,5 +70,4 @@ export class AuthController {
   async me(@Authorized('id') id: string) {
     return { id };
   }
-
 }

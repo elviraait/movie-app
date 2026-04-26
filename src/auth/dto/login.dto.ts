@@ -8,7 +8,6 @@ import {
 } from 'class-validator';
 
 export class LoginRequest {
-
   @IsEmail({}, { message: 'Некорректный email' })
   @IsNotEmpty({ message: 'Email не может быть пустым' })
   @IsString({ message: 'Email должен быть строкой' })

@@ -160,14 +160,12 @@ describe('Movies E2E', () => {
     });
 
     it('без токена должен получить 401', async () => {
-      const res = await request(app.getHttpServer())
-        .post('/movies')
-        .send({
-          title: 'Anon',
-          description: 'x',
-          year: 2020,
-          genre: Genre.ACTION,
-        });
+      const res = await request(app.getHttpServer()).post('/movies').send({
+        title: 'Anon',
+        description: 'x',
+        year: 2020,
+        genre: Genre.ACTION,
+      });
 
       expect(res.status).toBe(401);
     });

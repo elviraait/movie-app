@@ -1,12 +1,18 @@
-
-import { IsEnum, IsInt, IsIn, IsOptional, IsString, Min } from 'class-validator';
+import {
+  IsEnum,
+  IsInt,
+  IsIn,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 import { Type } from 'class-transformer';
-import { Genre } from 'src/generated/prisma/enums'; 
+import { Genre } from 'src/generated/prisma/enums';
 
 export class QueryMoviesDto {
   // --- PAGINATION ---
   @IsOptional()
-  @Type(() => Number)   // converts query string "2" → number 2
+  @Type(() => Number) // converts query string "2" → number 2
   @IsInt()
   @Min(1)
   page?: number = 1;
@@ -19,7 +25,7 @@ export class QueryMoviesDto {
 
   // --- FILTERING ---
   @IsOptional()
-  @IsEnum(Genre)        // only valid genres accepted (ACTION, COMEDY, etc.)
+  @IsEnum(Genre) // only valid genres accepted (ACTION, COMEDY, etc.)
   genre?: Genre;
 
   @IsOptional()

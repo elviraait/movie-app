@@ -8,12 +8,18 @@ export class CreateReviewDto {
   @Max(10)
   rating: number;
 
-  @ApiProperty({ description: 'Комментарий к фильму', example: 'Отличный фильм!' })
+  @ApiProperty({
+    description: 'Комментарий к фильму',
+    example: 'Отличный фильм!',
+  })
   @IsString()
   @IsOptional()
   comment?: string;
 
-  @ApiProperty({ description: 'ID фильма, к которому относится отзыв', example: 'movie-uuid' })
+  @ApiProperty({
+    description: 'ID фильма, к которому относится отзыв',
+    example: 'movie-uuid',
+  })
   @IsString()
   movieId: string;
 }

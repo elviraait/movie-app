@@ -11,9 +11,9 @@ jest.mock('./auth.service', () => {
   return {
     AuthService: jest.fn().mockImplementation(() => ({
       register: jest.fn(),
-      login:    jest.fn(),
-      refresh:  jest.fn(),
-      logout:   jest.fn(),
+      login: jest.fn(),
+      refresh: jest.fn(),
+      logout: jest.fn(),
     })),
   };
 });
@@ -21,10 +21,10 @@ jest.mock('./auth.service', () => {
 // Вспомогательная функция для создания mock Response
 const mockResponse = () => {
   const res: Partial<Response> = {
-    cookie:      jest.fn().mockReturnThis(),
+    cookie: jest.fn().mockReturnThis(),
     clearCookie: jest.fn().mockReturnThis(),
-    json:        jest.fn().mockReturnThis(),
-    status:      jest.fn().mockReturnThis(),
+    json: jest.fn().mockReturnThis(),
+    status: jest.fn().mockReturnThis(),
   };
   return res as Response;
 };
@@ -43,7 +43,7 @@ describe('AuthController', () => {
     const module: TestingModule = await Test.createTestingModule({
       // В тестах мы используем настоящий AuthController, но AuthService — мок
       controllers: [AuthController],
-      providers:   [AuthService],
+      providers: [AuthService],
     }).compile();
 
     controller = module.get<AuthController>(AuthController);
@@ -62,13 +62,12 @@ describe('AuthController', () => {
 
   // ─── register ─────────────────────────────────────────────
   describe('register', () => {
-
     it('должен вызвать authService.register и вернуть результат', async () => {
       // ARRANGE
       const dto = {
-        email:    'test@example.com',
+        email: 'test@example.com',
         password: 'strongPassword123',
-        name:     'John Doe',
+        name: 'John Doe',
       };
       const mockResult = { accessToken: 'access-token' };
       const res = mockResponse();
@@ -86,7 +85,11 @@ describe('AuthController', () => {
 
     it('должен пробросить ошибку если authService.register выбросил исключение', async () => {
       // ARRANGE
-      const dto = { email: 'exists@example.com', password: '123', name: 'Jane' };
+      const dto = {
+        email: 'exists@example.com',
+        password: '123',
+        name: 'Jane',
+      };
       const res = mockResponse();
 
       (authService.register as jest.Mock).mockRejectedValue(
@@ -98,12 +101,10 @@ describe('AuthController', () => {
         'User already exists',
       );
     });
-
   });
 
   // ─── login ────────────────────────────────────────────────
   describe('login', () => {
-
     it('должен вызвать authService.login и вернуть результат', async () => {
       // ARRANGE
       const dto = { email: 'test@example.com', password: 'password123' };
@@ -135,12 +136,10 @@ describe('AuthController', () => {
         'Invalid credentials',
       );
     });
-
   });
 
   // ─── refresh ──────────────────────────────────────────────
   describe('refresh', () => {
-
     it('должен вызвать authService.refresh и вернуть новый accessToken', async () => {
       // ARRANGE
       const req = mockRequest({ refreshToken: 'valid-refresh-token' });
@@ -172,12 +171,10 @@ describe('AuthController', () => {
         'Refresh token expired',
       );
     });
-
   });
 
   // ─── logout ───────────────────────────────────────────────
   describe('logout', () => {
-
     it('должен вызвать authService.logout и вернуть результат', async () => {
       // ARRANGE
       const res = mockResponse();
@@ -193,12 +190,10 @@ describe('AuthController', () => {
       expect(authService.logout).toHaveBeenCalledTimes(1);
       expect(result).toEqual(mockResult);
     });
-
   });
 
   // ─── me ───────────────────────────────────────────────────
   describe('me', () => {
-
     it('должен вернуть объект с id текущего пользователя', async () => {
       // ARRANGE
       const userId = 'uuid-current-user';
@@ -223,7 +218,5 @@ describe('AuthController', () => {
       expect(result).toEqual({ id: 'another-uuid-456' });
       expect(result.id).toBe(userId);
     });
-
   });
-
 });

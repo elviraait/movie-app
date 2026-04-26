@@ -1,4 +1,3 @@
-
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
@@ -49,9 +48,9 @@ export class MoviesService {
     return {
       data: movies,
       meta: {
-        total,              // total matching records
-        page,               // current page
-        limit,              // items per page
+        total, // total matching records
+        page, // current page
+        limit, // items per page
         totalPages: Math.ceil(total / limit),
         hasNextPage: page < Math.ceil(total / limit),
         hasPrevPage: page > 1,
@@ -59,20 +58,26 @@ export class MoviesService {
     };
   }
 
- async findOne(id: string) {
-  const movie = await this.prisma.movie.findUnique({ where: { id } });
-  if (!movie) throw new NotFoundException(`Movie ${id} not found`);
-  return movie;
-}
+  async findOne(id: string) {
+    const movie = await this.prisma.movie.findUnique({ where: { id } });
+    if (!movie) throw new NotFoundException(`Movie ${id} not found`);
+    return movie;
+  }
 
   async findOneWithReviews(id: string) {
     return this.prisma.movie.findUnique({
       where: { id },
       select: {
-        id: true, title: true, year: true, genre: true,
+        id: true,
+        title: true,
+        year: true,
+        genre: true,
         reviews: {
           select: {
-            id: true, rating: true, comment: true, createdAt: true,
+            id: true,
+            rating: true,
+            comment: true,
+            createdAt: true,
             user: { select: { id: true, name: true } },
           },
           orderBy: { createdAt: 'desc' },

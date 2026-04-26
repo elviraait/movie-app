@@ -8,16 +8,15 @@ export class NotificationsService {
   constructor(private readonly configService: ConfigService) {}
 
   // Вызывается при регистрации пользователя
-  async sendWelcomeEmail(data: {
-    email: string;
-    name: string;
-  }): Promise<void> {
+  async sendWelcomeEmail(data: { email: string; name: string }): Promise<void> {
     const webhookUrl = this.configService.get<string>(
       'N8N_WEBHOOK_REGISTER_URL',
     );
 
     if (!webhookUrl) {
-      this.logger.warn('N8N_WEBHOOK_REGISTER_URL не задан — уведомление пропущено');
+      this.logger.warn(
+        'N8N_WEBHOOK_REGISTER_URL не задан — уведомление пропущено',
+      );
       return;
     }
 
@@ -47,12 +46,12 @@ export class NotificationsService {
     rating: number;
     comment?: string;
   }): Promise<void> {
-    const webhookUrl = this.configService.get<string>(
-      'N8N_WEBHOOK_REVIEW_URL',
-    );
+    const webhookUrl = this.configService.get<string>('N8N_WEBHOOK_REVIEW_URL');
 
     if (!webhookUrl) {
-      this.logger.warn('N8N_WEBHOOK_REVIEW_URL не задан — уведомление пропущено');
+      this.logger.warn(
+        'N8N_WEBHOOK_REVIEW_URL не задан — уведомление пропущено',
+      );
       return;
     }
 

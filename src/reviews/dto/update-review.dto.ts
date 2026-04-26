@@ -9,7 +9,10 @@ export class UpdateReviewDto {
   @Max(10)
   rating?: number;
 
-  @ApiProperty({ description: 'Комментарий к фильму', example: 'Пересмотрел — мнение изменилось' })
+  @ApiProperty({
+    description: 'Комментарий к фильму',
+    example: 'Пересмотрел — мнение изменилось',
+  })
   @IsOptional()
   @IsString()
   comment?: string;

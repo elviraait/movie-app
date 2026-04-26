@@ -1,4 +1,9 @@
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 import { Role } from '../enums/role.enum';
@@ -27,10 +32,14 @@ export class RolesGuard implements CanActivate {
     const userLevel = ROLE_HIERARCHY[user?.role as Role] ?? -1;
 
     // User passes if their level is >= the minimum required role level
-    const minRequired = Math.min(...requiredRoles.map(r => ROLE_HIERARCHY[r] ?? 99));
+    const minRequired = Math.min(
+      ...requiredRoles.map((r) => ROLE_HIERARCHY[r] ?? 99),
+    );
 
     if (userLevel < minRequired) {
-      throw new ForbiddenException('У вас нет прав для доступа к этому ресурсу.');
+      throw new ForbiddenException(
+        'У вас нет прав для доступа к этому ресурсу.',
+      );
     }
 
     return true;

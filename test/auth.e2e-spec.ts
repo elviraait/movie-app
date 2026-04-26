@@ -35,13 +35,11 @@ describe('Auth E2E', () => {
     });
 
     it('должен сохранить пользователя в базе данных', async () => {
-      await request(app.getHttpServer())
-        .post('/auth/register')
-        .send({
-          email: 'db@example.com',
-          password: 'pass123',
-          name: 'DB User',
-        });
+      await request(app.getHttpServer()).post('/auth/register').send({
+        email: 'db@example.com',
+        password: 'pass123',
+        name: 'DB User',
+      });
 
       // Проверяем через Prisma напрямую
       const user = await prisma.user.findUnique({
@@ -90,13 +88,11 @@ describe('Auth E2E', () => {
   describe('POST /auth/login', () => {
     it('должен вернуть accessToken при верных данных', async () => {
       // Сначала регистрируем
-      await request(app.getHttpServer())
-        .post('/auth/register')
-        .send({
-          email: 'login@example.com',
-          password: 'pass123',
-          name: 'Login User',
-        });
+      await request(app.getHttpServer()).post('/auth/register').send({
+        email: 'login@example.com',
+        password: 'pass123',
+        name: 'Login User',
+      });
 
       // Логинимся
       const res = await request(app.getHttpServer())
@@ -108,13 +104,11 @@ describe('Auth E2E', () => {
     });
 
     it('должен установить cookie refreshToken', async () => {
-      await request(app.getHttpServer())
-        .post('/auth/register')
-        .send({
-          email: 'cookie@example.com',
-          password: 'pass123',
-          name: 'Cookie User',
-        });
+      await request(app.getHttpServer()).post('/auth/register').send({
+        email: 'cookie@example.com',
+        password: 'pass123',
+        name: 'Cookie User',
+      });
 
       const res = await request(app.getHttpServer())
         .post('/auth/login')
@@ -122,9 +116,7 @@ describe('Auth E2E', () => {
 
       // Проверяем что в cookie есть refreshToken
       expect(res.headers['set-cookie']).toBeDefined();
-      const cookies = [res.headers['set-cookie']]
-        .flat()
-        .filter(Boolean) as string[];
+      const cookies = [res.headers['set-cookie']].flat().filter(Boolean);
       expect(cookies.some((c) => c.startsWith('refreshToken='))).toBe(true);
     });
 
@@ -137,13 +129,11 @@ describe('Auth E2E', () => {
     });
 
     it('должен вернуть 404 если пароль неверный', async () => {
-      await request(app.getHttpServer())
-        .post('/auth/register')
-        .send({
-          email: 'wrong@example.com',
-          password: 'pass123',
-          name: 'User',
-        });
+      await request(app.getHttpServer()).post('/auth/register').send({
+        email: 'wrong@example.com',
+        password: 'pass123',
+        name: 'User',
+      });
 
       const res = await request(app.getHttpServer())
         .post('/auth/login')
@@ -156,13 +146,11 @@ describe('Auth E2E', () => {
   // ─── GET /auth/me ───────────────────────────────────────
   describe('GET /auth/me', () => {
     it('должен вернуть id пользователя по токену', async () => {
-      await request(app.getHttpServer())
-        .post('/auth/register')
-        .send({
-          email: 'me@example.com',
-          password: 'pass123',
-          name: 'Me User',
-        });
+      await request(app.getHttpServer()).post('/auth/register').send({
+        email: 'me@example.com',
+        password: 'pass123',
+        name: 'Me User',
+      });
       const login = await request(app.getHttpServer())
         .post('/auth/login')
         .send({ email: 'me@example.com', password: 'pass123' });

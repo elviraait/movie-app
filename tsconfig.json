@@ -10,6 +10,8 @@
     "skipLibCheck": true,
     "strict": true,
     "strictPropertyInitialization": false,
+    "isolatedModules": true,
+    "types": ["jest", "node"],
     "paths": {
       "src/*": ["./src/*"],
       "@/*": ["./src/*"]

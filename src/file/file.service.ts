@@ -4,16 +4,14 @@ import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
 @Injectable()
 export class FileService {
   constructor() {
-    // Configure Cloudinary from env vars
     cloudinary.config({
       cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-      api_key:    process.env.CLOUDINARY_API_KEY,
+      api_key: process.env.CLOUDINARY_API_KEY,
       api_secret: process.env.CLOUDINARY_API_SECRET,
     });
   }
 
-  async uploadFile(file: Express.Multer.File): Promise<{ url: string }> {
-    // If Cloudinary is not configured, reject upload
+  async uploadFile(file: any): Promise<{ url: string }> {
     if (!process.env.CLOUDINARY_CLOUD_NAME) {
       throw new InternalServerErrorException(
         'Image upload is not configured. Set CLOUDINARY_* env vars or use a poster URL directly.',
@@ -32,7 +30,9 @@ export class FileService {
           },
           (error: Error | undefined, result: UploadApiResponse | undefined) => {
             if (error || !result) {
-              reject(new InternalServerErrorException('Upload to Cloudinary failed'));
+              reject(
+                new InternalServerErrorException('Upload to Cloudinary failed'),
+              );
             } else {
               resolve({ url: result.secure_url });
             }
