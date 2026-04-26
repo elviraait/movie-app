@@ -13,6 +13,7 @@ import { LoginRequest } from './dto/login.dto';
 import type { Request, Response } from 'express';
 import { isDev } from 'src/utils/is-dev-utils';
 import { JwtPayload } from './interfaces/jwt.interface';
+import { NotificationsService } from 'src/notifications/notifications.service'; // 👈 добавили
 
 @Injectable()
 export class AuthService {
@@ -24,6 +25,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
+    private readonly notifications: NotificationsService, // 👈 добавили
   ) {
     this.JWT_ACCESS_TOKEN_TTL = this.configService.getOrThrow<string>(
       'JWT_ACCESS_TOKEN_TTL',
@@ -51,6 +53,10 @@ export class AuthService {
         password: await hash(password),
       },
     });
+
+    // 👇 Отправляем welcome-письмо через n8n (не блокирует ответ)
+    this.notifications.sendWelcomeEmail({ email, name });
+
     return this.auth(res, user.id);
   }
 
@@ -62,7 +68,7 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new NotFoundException('Пользователь с таким email не найден');
+      throw new NotFoundException('Пользователь с таким email не найден');
     }
 
     const isValidPassword = await verify(user.password, password);
@@ -101,14 +107,14 @@ export class AuthService {
     return { message: 'Вы успешно вышли из аккаунта' };
   }
 
- async validateUser(id: string) {
-  const user = await this.prisma.user.findUnique({
-    where: { id },
-    select: { id: true, role: true },
-  });
-  if (!user) throw new NotFoundException('Пользователь не найден');
-  return user;
-}
+  async validateUser(id: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: { id: true, role: true },
+    });
+    if (!user) throw new NotFoundException('Пользователь не найден');
+    return user;
+  }
 
   private auth(res: Response, id: string) {
     const { accessToken, refreshToken } = this.generateTokens(id);
@@ -144,10 +150,10 @@ export class AuthService {
   }
 
   async getMyReviews(userId: string) {
-  return this.prisma.review.findMany({
-    where: {
-      userId: userId,
-    },
-  });
-}
+    return this.prisma.review.findMany({
+      where: {
+        userId: userId,
+      },
+    });
+  }
 }

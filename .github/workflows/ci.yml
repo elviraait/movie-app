@@ -1,53 +1,44 @@
-name: Backend CI
+name: CI
 
 on:
-  push:
-    branches: [main]        # При push в main
   pull_request:
-    branches: [main]        # При PR в main
+    branches: [main, develop]
+
+  workflow_call:   # 👈 позволяет CD вызывать CI
 
 jobs:
-  ci:
-    name: Lint, Test & Build
+  lint-test:
+    name: Lint, Typecheck & Test
     runs-on: ubuntu-latest
 
     steps:
-      # ── 1. Скачиваем код репозитория ───────────────────────
-      - name: Checkout repository
+      # 1. Клонируем репозиторий
+      - name: Checkout
         uses: actions/checkout@v4
 
-      # ── 2. Устанавливаем Node.js 20 ─────────────────────────
+      # 2. Устанавливаем Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'           # Кешируем node_modules — быстрее
+          cache: 'npm'
 
-      # ── 3. Устанавливаем зависимости ────────────────────────
+      # 3. Устанавливаем зависимости
       - name: Install dependencies
         run: npm ci
 
-      # ── 4. Генерируем Prisma Client ─────────────────────────
-      # Нужно до линтинга и тестов — иначе TS не найдёт типы
+      # 4. Prisma (оставили твой config)
       - name: Generate Prisma Client
-        run: npx prisma generate
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: npx prisma generate --config prisma.config.ts
 
-      # ── 5. Проверяем линтером ────────────────────────────────
-      - name: Run ESLint
-        run: npx eslint "{src,apps,libs,test}/**/*.ts"
+      # 5. Линтинг
+      - name: Lint
+        run: npm run lint
 
-      # ── 6. Запускаем unit-тесты ─────────────────────────────
-      # Unit-тесты используют моки — реальная БД не нужна
-      - name: Run unit tests
-        run: npm test -- --passWithNoTests
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      # 6. Проверка типов (быстрее чем build)
+      - name: Type check
+        run: npx tsc --noEmit
 
-      # ── 7. Проверяем что TypeScript компилируется ────────────
-      - name: Build
-        run: npm run build
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      # 7. Тесты
+      - name: Unit tests
+        run: npm run test -- --passWithNoTests

@@ -7,14 +7,17 @@ import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Role } from 'src/auth/enums/role.enum';
+import { NotificationsService } from 'src/notifications/notifications.service'; // 👈
 
 @Injectable()
 export class ReviewsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService, // 👈
+  ) {}
 
-  // userId comes from the JWT, NOT from the request body
   async create(dto: CreateReviewDto, userId: string) {
-    return await this.prisma.review.create({
+    const review = await this.prisma.review.create({
       data: {
         rating: dto.rating,
         comment: dto.comment,
@@ -26,10 +29,28 @@ export class ReviewsService {
           select: {
             id: true,
             name: true,
+            email: true, // 👈 нужен email для уведомления
+          },
+        },
+        movie: {
+          select: {
+            id: true,
+            title: true,
           },
         },
       },
     });
+
+    // 👇 Отправляем уведомление через n8n (не блокирует ответ)
+    this.notifications.sendReviewNotification({
+      userEmail: review.user.email,
+      userName: review.user.name,
+      movieTitle: review.movie.title,
+      rating: review.rating,
+      comment: review.comment ?? undefined,
+    });
+
+    return review;
   }
 
   async findAll() {
@@ -60,7 +81,6 @@ export class ReviewsService {
 
     if (!review) throw new NotFoundException('Отзыв не найден');
 
-    // Only the owner can edit their review
     if (review.userId !== userId) {
       throw new ForbiddenException('Вы можете редактировать только свой отзыв');
     }
@@ -73,7 +93,6 @@ export class ReviewsService {
 
     if (!review) throw new NotFoundException('Отзыв не найден');
 
-    // Admins can delete any review; regular users only their own
     if (userRole !== Role.ADMIN && review.userId !== userId) {
       throw new ForbiddenException('Вы можете удалять только свои отзывы');
     }
